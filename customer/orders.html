@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلباتي - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Animations */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal.show { opacity: 1; visibility: visible; }
+        .modal-content-anim { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.show .modal-content-anim { transform: scale(1); }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <span class="text-xl font-bold tracking-wider text-gray-900 dark:text-white">Baridex</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">طلب تسعير</a>
+                    <a href="quotes.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">العروض</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">طلباتي</a>
+                    <a href="wallet.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">المحفظة</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الدعم</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="hidden md:block px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6 flex-grow">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        📦 طلباتي
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">تتبع حالة شحناتك خطوة بخطوة.</p>
+                </div>
+                <a href="price-requests.html" class="px-5 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-white/10 transition">
+                    طلب جديد +
+                </a>
+            </div>
+
+            <!-- Orders List Card -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-xl overflow-hidden">
+                <div id="ordersList" class="custom-scrollbar overflow-x-auto">
+                    <!-- Content injected via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Order Details -->
+    <div id="orderModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-brand-500">📦</span> تفاصيل الطلب
+                </h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="orderDetails" class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Details injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- App Logic ---
+        if (typeof Auth !== 'undefined') {
+            Auth.requireCustomer();
+            const currentUser = Auth.getCurrentUser();
+
+            function loadOrders() {
+                const ordersList = document.getElementById('ordersList');
+                const orders = db.getMany('orders', o => o.userId === currentUser.id).reverse();
+
+                if (orders.length === 0) {
+                    ordersList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 text-4xl">📭</div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">لا توجد طلبات</h3>
+                            <p class="text-gray-500 dark:text-gray-400 max-w-sm mb-6">لم تقم بإنشاء أي طلبات بعد. ابدأ بقبول عرض سعر لتحويله إلى طلب.</p>
+                            <a href="quotes.html" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition shadow-lg shadow-brand-500/20">الذهاب لعروض الأسعار</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <table class="w-full text-right whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 rounded-tr-2xl">رقم الطلب</th>
+                            <th class="px-6 py-4">المبلغ</th>
+                            <th class="px-6 py-4">الحالة</th>
+                            <th class="px-6 py-4">التاريخ</th>
+                            <th class="px-6 py-4 rounded-tl-2xl">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">`;
+                
+                orders.forEach(order => {
+                    const statusName = getOrderStatusName(order.status);
+                    // Status color logic adjusted for Tailwind classes or inline styles
+                    // Assuming getOrderStatusColor returns hex, we use inline style for bg opacity
+                    const statusColor = getOrderStatusColor(order.status);
+
+                    html += `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition group">
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">#${order.id}</td>
+                            <td class="px-6 py-4 text-sm font-bold text-green-600 dark:text-green-400 dir-ltr">${formatMoney(order.totalAmount)}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-md text-xs font-bold text-white shadow-sm" style="background-color: ${statusColor};">
+                                    ${statusName}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${formatDate(order.createdAt)}</td>
+                            <td class="px-6 py-4">
+                                <button onclick="viewOrder(${order.id})" class="px-4 py-2 text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 hover:bg-brand-100 dark:hover:bg-brand-500/20 rounded-lg transition">
+                                    عرض التفاصيل
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                ordersList.innerHTML = html;
+            }
+
+            function viewOrder(id) {
+                const order = db.getOne('orders', o => o.id === id);
+                if (!order) return;
+
+                const quote = db.getOne('quotes', q => q.id === order.quoteId);
+                const request = db.getOne('priceRequests', r => r.id === order.requestId);
+                const office = db.getOne('offices', of => of.id === currentUser.officeId);
+
+                // Timeline Logic
+                const statuses = order.statusHistory || [];
+                let timelineHtml = '';
+                
+                statuses.forEach((statusItem, index) => {
+                    const isLast = index === statuses.length - 1;
+                    const itemColor = getOrderStatusColor(statusItem.status);
+                    
+                    timelineHtml += `
+                        <div class="relative flex gap-4 ${isLast ? '' : 'pb-8'}">
+                            ${!isLast ? `<div class="absolute top-8 right-[1.25rem] w-0.5 h-[calc(100%-2rem)] bg-gray-200 dark:bg-gray-700"></div>` : ''}
+                            
+                            <div class="relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md" style="background-color: ${itemColor};">
+                                ${index + 1}
+                            </div>
+                            
+                            <div class="pt-1">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">${getOrderStatusName(statusItem.status)}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right">${formatDateTime(statusItem.timestamp)}</p>
+                                ${statusItem.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 mt-2 bg-gray-50 dark:bg-white/5 p-2 rounded border border-gray-100 dark:border-white/5">📝 ${statusItem.note}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                let html = `
+                    <div class="space-y-6">
+                        <!-- Header Summary -->
+                        <div class="flex justify-between items-center p-4 rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-500/20">
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">رقم الطلب</p>
+                                <p class="text-lg font-black text-brand-600 dark:text-brand-400">#${order.id}</p>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">الإجمالي</p>
+                                <p class="text-lg font-black text-green-600 dark:text-green-400 dir-ltr">${formatMoney(order.totalAmount)}</p>
+                            </div>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Product Info -->
+                            <div class="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <span>🛒</span> معلومات المنتج
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">المنصة</span>
+                                        <span class="font-medium text-gray-900 dark:text-white">${getPlatformName(request.platform)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">الكمية</span>
+                                        <span class="font-medium text-gray-900 dark:text-white">${quote.quantity}</span>
+                                    </div>
+                                    <div class="pt-2 mt-2 border-t border-gray-200 dark:border-white/10">
+                                        <a href="${request.productUrl}" target="_blank" class="text-brand-600 dark:text-brand-400 text-xs hover:underline flex items-center gap-1">
+                                            🔗 رابط المنتج الأصلي
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Office Info -->
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/10">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <span>📍</span> مكتب الاستلام
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <p class="font-bold text-gray-900 dark:text-white">${office.name}</p>
+                                    <p class="text-gray-600 dark:text-gray-300 flex items-center gap-1 text-xs"><span class="opacity-50">📞</span> ${office.phone}</p>
+                                    <p class="text-gray-600 dark:text-gray-300 flex items-center gap-1 text-xs"><span class="opacity-50">📫</span> ${office.address}, ${office.city}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                                <span>🚚</span> تتبع المسار
+                            </h4>
+                            <div class="pr-2">
+                                ${timelineHtml}
+                            </div>
+                        </div>
+
+                        <!-- Footer Info -->
+                        <div class="text-center pt-4 border-t border-gray-100 dark:border-white/5">
+                            <p class="text-xs text-gray-400">تم إنشاء الطلب بتاريخ ${formatDateTime(order.createdAt)}</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('orderDetails').innerHTML = html;
+                document.getElementById('orderModal').classList.add('show');
+            }
+
+            // Initialize
+            loadOrders();
+
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('show');
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target == modal) closeModal();
+        }
+    </script>
+</body>
+</html>

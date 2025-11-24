@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلبات التسعير - Admin - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Transition */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal.show { opacity: 1; visibility: visible; }
+        .modal-content-anim { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.show .modal-content-anim { transform: scale(1); }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Admin Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold tracking-wider text-gray-900 dark:text-white leading-none">Baridex</span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">طلبات التسعير</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الطلبات</a>
+                    <a href="customers.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">العملاء</a>
+                    <a href="offices.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">المكاتب</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التذاكر</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="hidden md:block px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6 flex-grow">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📋</span> طلبات التسعير
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">مراجعة وإرسال عروض الأسعار للعملاء.</p>
+                </div>
+                
+                <!-- Filter -->
+                <div class="relative w-full md:w-64">
+                    <select id="filterStatus" class="w-full px-4 py-2.5 rounded-xl bg-white/80 dark:bg-dark-900/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none appearance-none shadow-sm">
+                        <option value="all" class="dark:bg-dark-900">الكل</option>
+                        <option value="pending" class="dark:bg-dark-900" selected>قيد الانتظار</option>
+                        <option value="quoted" class="dark:bg-dark-900">تم التسعير</option>
+                        <option value="rejected" class="dark:bg-dark-900">مرفوض</option>
+                    </select>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-xl overflow-hidden">
+                <div id="requestsList" class="custom-scrollbar overflow-x-auto">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create/View Quote Modal -->
+    <div id="quoteModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white" id="modalTitle">تفاصيل الطلب</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="modalContent" class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="messageToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all duration-300">
+        <div class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm flex items-center gap-2">
+            <span id="messageIcon">✅</span>
+            <span id="messageText">تمت العملية بنجاح</span>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- Toast UI ---
+        window.showMessage = function(msg, type = 'success') {
+            const toast = document.getElementById('messageToast');
+            const text = document.getElementById('messageText');
+            const icon = document.getElementById('messageIcon');
+            
+            text.textContent = msg;
+            icon.textContent = type === 'error' ? '❌' : '✅';
+            
+            toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        };
+
+        // --- App Logic ---
+        if (typeof Auth !== 'undefined') {
+            Auth.requireAdmin();
+
+            document.getElementById('filterStatus').addEventListener('change', loadRequests);
+
+            function loadRequests() {
+                const filter = document.getElementById('filterStatus').value;
+                const requestsList = document.getElementById('requestsList');
+                
+                let requests = db.getAll('priceRequests');
+                if (filter !== 'all') {
+                    requests = requests.filter(r => r.status === filter);
+                }
+                requests = requests.reverse();
+
+                if (requests.length === 0) {
+                    requestsList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 text-4xl">📭</div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">لا توجد طلبات</h3>
+                            <p class="text-gray-500 dark:text-gray-400 max-w-sm">لا توجد طلبات تسعير تطابق البحث الحالي.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <table class="w-full text-right whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 rounded-tr-2xl">رقم الطلب</th>
+                            <th class="px-6 py-4">العميل</th>
+                            <th class="px-6 py-4">المنصة</th>
+                            <th class="px-6 py-4">الكمية</th>
+                            <th class="px-6 py-4">الحالة</th>
+                            <th class="px-6 py-4">التاريخ</th>
+                            <th class="px-6 py-4 rounded-tl-2xl">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">`;
+                
+                requests.forEach(request => {
+                    const customer = db.getOne('users', u => u.id === request.userId);
+                    let badgeClass = "", statusText = "";
+                    if (request.status === 'pending') {
+                        badgeClass = "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/10 dark:text-yellow-400";
+                        statusText = "جديد";
+                    } else if (request.status === 'quoted') {
+                        badgeClass = "bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-400";
+                        statusText = "تم التسعير";
+                    } else {
+                        badgeClass = "bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400";
+                        statusText = "مرفوض";
+                    }
+                    
+                    html += `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition group">
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">#${request.id}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                                        ${customer ? customer.fullName.charAt(0) : '?'}
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">${customer ? customer.fullName : 'غير معروف'}</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 dir-ltr text-right">${customer ? customer.phone : ''}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">${getPlatformName(request.platform)}</td>
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">${request.quantity}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${badgeClass}">${statusText}</span>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">${formatDate(request.createdAt)}</td>
+                            <td class="px-6 py-4 flex gap-2">
+                                <button onclick="viewRequest(${request.id})" class="p-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition" title="عرض">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                                ${request.status === 'pending' ? `
+                                <button onclick="createQuote(${request.id})" class="p-2 rounded-lg text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 transition" title="إنشاء تسعير">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                requestsList.innerHTML = html;
+            }
+
+            window.viewRequest = function(id) {
+                const request = db.getOne('priceRequests', r => r.id === id);
+                const customer = db.getOne('users', u => u.id === request.userId);
+                
+                document.getElementById('modalTitle').textContent = `تفاصيل الطلب #${request.id}`;
+                document.getElementById('modalContent').innerHTML = `
+                    <div class="space-y-6">
+                        <div class="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-lg">
+                                    ${customer.fullName.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 dark:text-white">${customer.fullName}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">${customer.phone} | ${customer.email}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl border border-gray-200 dark:border-white/10">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">المنصة</p>
+                                <p class="font-bold text-gray-900 dark:text-white">${getPlatformName(request.platform)}</p>
+                            </div>
+                            <div class="p-4 rounded-xl border border-gray-200 dark:border-white/10">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">الكمية</p>
+                                <p class="font-bold text-gray-900 dark:text-white">${request.quantity} قطعة</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/10">
+                            <p class="text-xs text-blue-500 dark:text-blue-400 mb-2 font-bold">رابط المنتج</p>
+                            <a href="${request.productUrl}" target="_blank" class="text-sm text-blue-600 dark:text-blue-300 hover:underline break-all">${request.productUrl}</a>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-bold">ملاحظات العميل</p>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">${request.notes || 'لا توجد ملاحظات'}</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('quoteModal').classList.add('show');
+            };
+
+            window.createQuote = function(requestId) {
+                const request = db.getOne('priceRequests', r => r.id === requestId);
+                const customer = db.getOne('users', u => u.id === request.userId);
+                
+                document.getElementById('modalTitle').textContent = `إنشاء تسعير للطلب #${request.id}`;
+                
+                document.getElementById('modalContent').innerHTML = `
+                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/10 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-blue-500 dark:text-blue-400">العميل</p>
+                            <p class="font-bold text-gray-900 dark:text-white">${customer.fullName}</p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-blue-500 dark:text-blue-400">الكمية المطلوبة</p>
+                            <p class="font-bold text-gray-900 dark:text-white">${request.quantity}</p>
+                        </div>
+                    </div>
+
+                    <form id="addQuoteForm" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">عملة المورد</label>
+                                <select id="currency" required class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none">
+                                    <option value="CNY" class="dark:bg-dark-900">CNY - يوان</option>
+                                    <option value="USD" class="dark:bg-dark-900">USD - دولار</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">سعر الصرف</label>
+                                <input type="number" id="exchangeRate" step="0.0001" value="0.14" required class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none dir-ltr text-left">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">سعر الوحدة (بالمصدر)</label>
+                                <input type="number" id="unitPrice" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none dir-ltr text-left">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الكمية</label>
+                                <input type="number" id="quantity" value="${request.quantity}" readonly class="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 outline-none cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">شحن داخلي ($)</label>
+                                <input type="number" id="domesticShipping" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none dir-ltr text-left">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">شحن دولي ($)</label>
+                                <input type="number" id="internationalShipping" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none dir-ltr text-left">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">العمولة ($)</label>
+                                <input type="number" id="commission" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none dir-ltr text-left">
+                            </div>
+                        </div>
+
+                        <!-- Live Calculation Preview -->
+                        <div class="bg-gray-900 dark:bg-black text-white p-4 rounded-xl mt-4">
+                            <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                <span>تكلفة البضاعة (USD)</span>
+                                <span id="calcProductCost" class="dir-ltr">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                <span>إجمالي الشحن والعمولة</span>
+                                <span id="calcFees" class="dir-ltr">$0.00</span>
+                            </div>
+                            <div class="border-t border-gray-700 pt-2 flex justify-between items-center">
+                                <span class="font-bold">المجموع النهائي للعميل</span>
+                                <span id="calcTotal" class="text-xl font-bold text-green-400 dir-ltr">$0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-lg shadow-green-500/20">
+                            حفظ وإرسال العرض
+                        </button>
+                    </form>
+                `;
+                
+                document.getElementById('quoteModal').classList.add('show');
+
+                // Add Event Listeners for Calc
+                const form = document.getElementById('addQuoteForm');
+                form.querySelectorAll('input, select').forEach(input => {
+                    input.addEventListener('input', calculateTotal);
+                });
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveQuote(requestId);
+                });
+            };
+
+            function calculateTotal() {
+                const currency = document.getElementById('currency').value;
+                const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+                const quantity = parseInt(document.getElementById('quantity').value) || 0;
+                const domesticShipping = parseFloat(document.getElementById('domesticShipping').value) || 0;
+                const internationalShipping = parseFloat(document.getElementById('internationalShipping').value) || 0;
+                const commission = parseFloat(document.getElementById('commission').value) || 0;
+                const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+
+                const productCost = (unitPrice * quantity) * (currency === 'CNY' ? exchangeRate : 1);
+                const fees = domesticShipping + internationalShipping + commission;
+                const total = productCost + fees;
+
+                document.getElementById('calcProductCost').textContent = formatMoney(productCost);
+                document.getElementById('calcFees').textContent = formatMoney(fees);
+                document.getElementById('calcTotal').textContent = formatMoney(total);
+            }
+
+            function saveQuote(requestId) {
+                const currency = document.getElementById('currency').value;
+                const unitPrice = parseFloat(document.getElementById('unitPrice').value);
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const domesticShipping = parseFloat(document.getElementById('domesticShipping').value);
+                const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
+                const commission = parseFloat(document.getElementById('commission').value);
+                const exchangeRate = parseFloat(document.getElementById('exchangeRate').value);
+
+                const productCost = (unitPrice * quantity) * (currency === 'CNY' ? exchangeRate : 1);
+                const totalAmount = productCost + domesticShipping + internationalShipping + commission;
+
+                const request = db.getOne('priceRequests', r => r.id === requestId);
+
+                const newQuote = {
+                    id: db.getNextId('quoteId'),
+                    requestId: requestId,
+                    userId: request.userId,
+                    currency,
+                    unitPrice,
+                    quantity,
+                    domesticShipping,
+                    internationalShipping,
+                    commission,
+                    exchangeRate,
+                    productCost,
+                    totalAmount,
+                    status: 'pending',
+                    createdAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                };
+
+                db.insert('quotes', newQuote);
+                db.update('priceRequests', r => r.id === requestId, { status: 'quoted' });
+
+                showMessage('تم إرسال عرض السعر بنجاح');
+                closeModal();
+                loadRequests();
+            }
+
+            window.closeModal = function() {
+                document.getElementById('quoteModal').classList.remove('show');
+            }
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('quoteModal')) closeModal();
+            }
+
+            loadRequests();
+        }
+    </script>
+</body>
+</html>

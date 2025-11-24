@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التذاكر - Admin - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Transition */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal.show { opacity: 1; visibility: visible; }
+        .modal-content-anim { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.show .modal-content-anim { transform: scale(1); }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Admin Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold tracking-wider text-gray-900 dark:text-white leading-none">Baridex</span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التسعير</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الطلبات</a>
+                    <a href="customers.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">العملاء</a>
+                    <a href="offices.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">المكاتب</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">التذاكر</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="hidden md:block px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6 flex-grow">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>🎫</span> إدارة التذاكر
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">متابعة استفسارات وشكاوى العملاء والرد عليها.</p>
+                </div>
+                
+                <!-- Filter -->
+                <div class="relative w-full md:w-64">
+                    <select id="filterStatus" class="w-full px-4 py-2.5 rounded-xl bg-white/80 dark:bg-dark-900/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none appearance-none shadow-sm">
+                        <option value="all" class="dark:bg-dark-900">الكل</option>
+                        <option value="open" class="dark:bg-dark-900" selected>مفتوحة</option>
+                        <option value="in_progress" class="dark:bg-dark-900">جاري المعالجة</option>
+                        <option value="closed" class="dark:bg-dark-900">مغلقة</option>
+                    </select>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Table -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-xl overflow-hidden">
+                <div id="ticketsList" class="custom-scrollbar overflow-x-auto">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Ticket Chat/Edit Modal -->
+    <div id="ticketModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-4xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col h-[85vh]">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 rounded-t-2xl">
+                <div class="flex items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white" id="modalTitle">تفاصيل التذكرة</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="modalCustomer">العميل: ...</p>
+                    </div>
+                    <div class="h-8 w-[1px] bg-gray-300 dark:bg-white/20"></div>
+                    <select id="ticketStatus" onchange="quickUpdateStatus()" class="px-3 py-1.5 rounded-lg bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 text-sm font-medium text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-brand-500 outline-none">
+                        <option value="open" class="dark:bg-dark-900">مفتوحة</option>
+                        <option value="in_progress" class="dark:bg-dark-900">جاري المعالجة</option>
+                        <option value="closed" class="dark:bg-dark-900">مغلقة</option>
+                    </select>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Chat Body -->
+            <div id="ticketDetails" class="flex-grow p-6 overflow-y-auto custom-scrollbar bg-gray-100 dark:bg-black/40 space-y-4">
+                <!-- Chat Messages Injected Here -->
+            </div>
+
+            <!-- Reply Footer -->
+            <div id="replySection" class="p-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-dark-900 rounded-b-2xl">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="messageToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all duration-300">
+        <div class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm flex items-center gap-2">
+            <span id="messageIcon">✅</span>
+            <span id="messageText">تمت العملية بنجاح</span>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- Toast UI ---
+        window.showMessage = function(msg, type = 'success') {
+            const toast = document.getElementById('messageToast');
+            const text = document.getElementById('messageText');
+            const icon = document.getElementById('messageIcon');
+            
+            text.textContent = msg;
+            icon.textContent = type === 'error' ? '❌' : '✅';
+            
+            toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        };
+
+        // --- App Logic ---
+        if (typeof Auth !== 'undefined') {
+            Auth.requireAdmin();
+            let currentOpenTicketId = null; // Track open ticket for quick status update
+
+            document.getElementById('filterStatus').addEventListener('change', loadTickets);
+
+            function loadTickets() {
+                const filter = document.getElementById('filterStatus').value;
+                const ticketsList = document.getElementById('ticketsList');
+                
+                let tickets = db.getAll('tickets');
+                if (filter !== 'all') {
+                    tickets = tickets.filter(t => t.status === filter);
+                }
+                tickets = tickets.reverse();
+
+                if (tickets.length === 0) {
+                    ticketsList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 text-4xl">🎫</div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">لا توجد تذاكر</h3>
+                            <p class="text-gray-500 dark:text-gray-400 max-w-sm">لا توجد تذاكر تطابق الفلتر الحالي.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <table class="w-full text-right whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 rounded-tr-2xl">الرقم</th>
+                            <th class="px-6 py-4">العميل</th>
+                            <th class="px-6 py-4">الموضوع</th>
+                            <th class="px-6 py-4">النوع</th>
+                            <th class="px-6 py-4">الحالة</th>
+                            <th class="px-6 py-4">آخر رد</th>
+                            <th class="px-6 py-4 rounded-tl-2xl">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">`;
+                
+                tickets.forEach(ticket => {
+                    const customer = db.getOne('users', u => u.id === ticket.userId);
+                    
+                    let badgeClass = "", statusText = "";
+                    if (ticket.status === 'open') {
+                        badgeClass = "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/10 dark:text-yellow-400";
+                        statusText = "مفتوحة";
+                    } else if (ticket.status === 'in_progress') {
+                        badgeClass = "bg-blue-100 text-blue-800 dark:bg-blue-500/10 dark:text-blue-400";
+                        statusText = "جاري المعالجة";
+                    } else {
+                        badgeClass = "bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-400";
+                        statusText = "مغلقة";
+                    }
+                    
+                    const typeText = ticket.type === 'order' ? '📦 طلب' :
+                                    ticket.type === 'wallet' ? '💰 محفظة' :
+                                    ticket.type === 'general' ? '❓ عام' : '⚠️ شكوى';
+                    
+                    const lastMessage = ticket.messages[ticket.messages.length - 1];
+                    const lastSender = lastMessage.sender === 'customer' ? 'العميل' : 'الدعم';
+                    const needsReply = lastMessage.sender === 'customer' && ticket.status !== 'closed';
+                    
+                    // Row styling for needs reply
+                    const rowClass = needsReply ? 'bg-red-50 dark:bg-red-900/10' : 'hover:bg-gray-50 dark:hover:bg-white/5';
+
+                    html += `
+                        <tr class="${rowClass} transition group cursor-pointer" onclick="viewTicket(${ticket.id})">
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">#${ticket.id}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white">${customer.fullName}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 dir-ltr text-right">${customer.phone}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-xs truncate" title="${ticket.subject}">${ticket.subject}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${typeText}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${badgeClass}">${statusText}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col">
+                                    <span class="text-sm ${needsReply ? 'font-bold text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">${lastSender}</span>
+                                    <span class="text-[10px] text-gray-400">${formatDate(lastMessage.timestamp)}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <button class="p-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                ticketsList.innerHTML = html;
+            }
+
+            window.viewTicket = function(id) {
+                currentOpenTicketId = id;
+                const ticket = db.getOne('tickets', t => t.id === id);
+                const customer = db.getOne('users', u => u.id === ticket.userId);
+
+                document.getElementById('modalTitle').textContent = `#${ticket.id} - ${ticket.subject}`;
+                document.getElementById('modalCustomer').textContent = `${customer.fullName} (${customer.phone})`;
+                
+                // Update Status Dropdown
+                const statusSelect = document.getElementById('ticketStatus');
+                statusSelect.value = ticket.status;
+
+                // Build Chat
+                let chatHtml = `
+                    <div class="text-center text-xs text-gray-400 mb-4">
+                        <span>${formatDateTime(ticket.createdAt)}</span>
+                        <span class="mx-1">•</span>
+                        <span>${ticket.type === 'order' ? `طلب #${ticket.orderId}` : (ticket.type === 'wallet' ? 'محفظة' : 'عام')}</span>
+                    </div>
+                `;
+
+                ticket.messages.forEach(msg => {
+                    const isCustomer = msg.sender === 'customer';
+                    // Admin (Me) -> Left (End in LTR, Left in RTL). Customer -> Right (Start)
+                    // Visuals: Admin = Brand Color. Customer = White/Gray.
+                    
+                    chatHtml += `
+                        <div class="flex ${!isCustomer ? 'justify-end' : 'justify-start'} mb-4">
+                            ${isCustomer ? `<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300 ml-2 flex-shrink-0">${customer.fullName.charAt(0)}</div>` : ''}
+                            
+                            <div class="flex flex-col ${!isCustomer ? 'items-end' : 'items-start'} max-w-[75%]">
+                                <div class="px-4 py-3 rounded-2xl text-sm shadow-sm 
+                                    ${!isCustomer 
+                                        ? 'bg-brand-600 text-white rounded-br-none' 
+                                        : 'bg-white dark:bg-white/10 text-gray-800 dark:text-gray-200 rounded-bl-none border border-gray-200 dark:border-white/10'}">
+                                    ${msg.message}
+                                </div>
+                                <span class="text-[10px] text-gray-400 mt-1 px-1">
+                                    ${!isCustomer ? 'أنت' : 'العميل'} • ${formatDateTime(msg.timestamp)}
+                                </span>
+                            </div>
+                            
+                            ${!isCustomer ? `<div class="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center text-xs font-bold text-brand-600 dark:text-brand-400 mr-2 flex-shrink-0">A</div>` : ''}
+                        </div>
+                    `;
+                });
+                document.getElementById('ticketDetails').innerHTML = chatHtml;
+
+                // Reply Section
+                const replySection = document.getElementById('replySection');
+                if (ticket.status !== 'closed') {
+                    replySection.innerHTML = `
+                        <div class="flex gap-2 flex-col md:flex-row items-end">
+                            <textarea id="adminReply" rows="2" placeholder="اكتب ردك هنا..." 
+                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none resize-none custom-scrollbar"></textarea>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <button onclick="sendAdminReply(${ticket.id})" class="flex-1 md:flex-none px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 whitespace-nowrap">
+                                    <span>إرسال</span>
+                                    <svg class="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                </button>
+                                <button onclick="sendAndClose(${ticket.id})" class="px-3 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition shadow-lg shadow-green-500/20" title="إرسال وإغلاق التذكرة">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    replySection.innerHTML = `
+                        <div class="text-center py-3 bg-gray-50 dark:bg-white/5 rounded-xl text-gray-500 text-sm border border-gray-200 dark:border-white/5">
+                            🚫 هذه التذكرة مغلقة
+                            <button onclick="reopenTicket(${ticket.id})" class="text-brand-600 hover:underline mr-2 font-bold">إعادة فتح؟</button>
+                        </div>
+                    `;
+                }
+
+                // Scroll to bottom
+                const chatContainer = document.getElementById('ticketDetails');
+                setTimeout(() => chatContainer.scrollTop = chatContainer.scrollHeight, 10);
+
+                document.getElementById('ticketModal').classList.add('show');
+            };
+
+            window.quickUpdateStatus = function() {
+                if (!currentOpenTicketId) return;
+                const newStatus = document.getElementById('ticketStatus').value;
+                db.update('tickets', t => t.id === currentOpenTicketId, { status: newStatus });
+                showMessage('تم تحديث الحالة');
+                viewTicket(currentOpenTicketId); // refresh UI
+                loadTickets(); // refresh list
+            };
+
+            window.sendAdminReply = function(ticketId) {
+                const replyInput = document.getElementById('adminReply');
+                const replyMessage = replyInput.value.trim();
+                
+                if (!replyMessage) return;
+
+                const ticket = db.getOne('tickets', t => t.id === ticketId);
+                ticket.messages.push({
+                    sender: 'admin',
+                    message: replyMessage,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Auto update status to in_progress if open
+                const newStatus = ticket.status === 'open' ? 'in_progress' : ticket.status;
+
+                db.update('tickets', t => t.id === ticketId, { 
+                    messages: ticket.messages,
+                    status: newStatus
+                });
+                
+                replyInput.value = '';
+                viewTicket(ticketId);
+                loadTickets();
+            };
+
+            window.sendAndClose = function(ticketId) {
+                const replyMessage = document.getElementById('adminReply').value.trim();
+                
+                // If empty, confirm just closing
+                if (!replyMessage && !confirm('إغلاق التذكرة بدون رد؟')) return;
+
+                const ticket = db.getOne('tickets', t => t.id === ticketId);
+                
+                if (replyMessage) {
+                    ticket.messages.push({
+                        sender: 'admin',
+                        message: replyMessage,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                db.update('tickets', t => t.id === ticketId, { 
+                    messages: ticket.messages,
+                    status: 'closed'
+                });
+
+                showMessage('تم الرد وإغلاق التذكرة');
+                closeModal();
+                loadTickets();
+            };
+
+            window.reopenTicket = function(ticketId) {
+                db.update('tickets', t => t.id === ticketId, { status: 'in_progress' });
+                showMessage('تم إعادة فتح التذكرة');
+                viewTicket(ticketId);
+                loadTickets();
+            };
+
+            window.closeModal = function() {
+                document.getElementById('ticketModal').classList.remove('show');
+                currentOpenTicketId = null;
+            }
+            
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('ticketModal')) closeModal();
+            }
+
+            loadTickets();
+        }
+    </script>
+</body>
+</html>

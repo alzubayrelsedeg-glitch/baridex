@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baridex | Global Logistics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- خطوط عربية وإنجليزية -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // التفعيل اليدوي للوضع الليلي
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'], // للإنجليزية
+                        cairo: ['Cairo', 'sans-serif'] // للعربية
+                    },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; }
+        /* الخط الافتراضي بناءً على اللغة */
+        :lang(ar) { font-family: 'Cairo', sans-serif; }
+        :lang(en) { font-family: 'Inter', sans-serif; }
+
+        /* خلفية الشبكة */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        
+        /* متغيرات الألوان للشبكة */
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* تصميم الكروت في الوضعين */
+        .bento-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* الوضع المظلم للكروت */
+        .dark .bento-card {
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .dark .bento-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+        }
+        /* الوضع الفاتح للكروت */
+        html:not(.dark) .bento-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        html:not(.dark) .bento-card:hover {
+            background: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased">
+
+    <!-- الخلفية المتحركة -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <!-- Blobs: Visible in Dark, Faded in Light -->
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/70 dark:bg-dark-950/50 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <span class="text-xl font-bold tracking-wider text-gray-900 dark:text-white">Baridex</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3 md:gap-6">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <!-- Sun Icon (Show in Dark) -->
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon (Show in Light) -->
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <!-- Lang Toggle -->
+                <button onclick="toggleLang()" class="flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+                    <span id="lang-text">EN</span>
+                </button>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <div class="hidden md:flex gap-3">
+                    <a href="login.html" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition" data-i18n="login">دخول</a>
+                    <a href="register.html" class="px-5 py-2 text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-black rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-lg shadow-gray-500/20" data-i18n="register">حساب جديد</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Hero Title -->
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold mb-6 tracking-wide uppercase">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                    <span data-i18n="hero_badge">النظام المالي الآمن v2.0</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.1] text-gray-900 dark:text-white" data-i18n="hero_title">
+                    الجيل القادم من <br> خدمات الاستيراد
+                </h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mx-auto max-w-2xl" data-i18n="hero_desc">
+                    نظام رقمي متكامل يربط تجارتك بالصين عبر محفظة افتراضية موثقة بسجلات رسمية. تحكم، تتبع، واستلم بضائعك في ليبيا بأمان تام.
+                </p>
+            </div>
+
+            <!-- Bento Grid Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
+                
+                <!-- Card 1: Map -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 bento-card rounded-3xl p-8 relative overflow-hidden group">
+                    <!-- Map Background (Different opacity for light/dark) -->
+                    <div class="absolute inset-0 bg-[url('https://img.freepik.com/free-vector/gradient-world-map-background_23-2148254495.jpg')] opacity-5 dark:opacity-10 bg-cover bg-center group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-500 filter grayscale"></div>
+                    
+                    <div class="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 text-2xl">🌏</div>
+                            <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white" data-i18n="card1_title">ربط لوجستي مباشر</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm" data-i18n="card1_desc">من مستودعات الصين إلى مدن ليبيا (طرابلس، بنغازي، مصراتة) عبر خطوط شحن جوي وبحري منتظمة.</p>
+                        </div>
+                        <!-- Visualization -->
+                        <div class="mt-8 flex items-center gap-4 opacity-70">
+                            <span class="px-3 py-1 rounded-md border border-gray-200 dark:border-white/10 text-xs bg-white/50 dark:bg-black/20 text-gray-700 dark:text-gray-300">CN China</span>
+                            <div class="h-[1px] flex-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                            <span class="px-3 py-1 rounded-md border border-gray-200 dark:border-white/10 text-xs bg-white/50 dark:bg-black/20 text-gray-700 dark:text-gray-300">LY Libya</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Wallet -->
+                <div class="col-span-1 lg:col-span-2 bento-card rounded-3xl p-8 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl group-hover:bg-brand-500/20 transition"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center mb-4 text-green-600 dark:text-green-400 text-xl">🛡️</div>
+                            <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white" data-i18n="card2_title">محفظة موثقة</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm" data-i18n="card2_desc">رصيدك الافتراضي يطابق تماماً <br> سجلاتنا المالية المعتمدة.</p>
+                        </div>
+                        <svg class="w-16 h-16 text-gray-200 dark:text-white/5 group-hover:text-gray-300 dark:group-hover:text-white/10 transition duration-500 transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    </div>
+                </div>
+
+                <!-- Card 3: Tracking -->
+                <div class="col-span-1 bento-card rounded-3xl p-6 flex flex-col justify-center group">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400 text-xl group-hover:scale-110 transition">📡</div>
+                    <h3 class="text-lg font-bold mb-1 text-gray-900 dark:text-white" data-i18n="card3_title">تتبع حي</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs" data-i18n="card3_desc">راقب طلباتك في كل خطوة.</p>
+                    <div class="mt-4 h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-purple-500 w-2/3 animate-pulse"></div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Support -->
+                <div class="col-span-1 bento-card rounded-3xl p-6 flex flex-col justify-center group">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center mb-4 text-orange-600 dark:text-orange-400 text-xl group-hover:scale-110 transition">💬</div>
+                    <h3 class="text-lg font-bold mb-1 text-gray-900 dark:text-white" data-i18n="card4_title">دعم فوري</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs" data-i18n="card4_desc">فريقنا معك في المكاتب وعبر الموقع.</p>
+                </div>
+
+                <!-- Card 5: CTA -->
+                <div class="col-span-1 lg:col-span-4 bento-card rounded-3xl p-2 bg-gradient-to-r from-brand-600 to-brand-800 border-none flex items-center justify-between group cursor-pointer hover:brightness-110 shadow-xl shadow-brand-600/20">
+                    <div class="px-8 py-6">
+                        <h3 class="text-2xl font-bold text-white" data-i18n="cta_title">ابدأ رحلة الاستيراد الآن</h3>
+                        <p class="text-blue-100 text-sm mt-1" data-i18n="cta_desc">سجل حسابك مجاناً واحصل على عنوانك الصيني.</p>
+                    </div>
+                    <a href="register.html" class="mx-4 w-12 h-12 bg-white rounded-full flex items-center justify-center text-brand-600 transition transform rtl:rotate-180 group-hover:translate-x-[-10px] rtl:group-hover:translate-x-[10px]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-10 text-gray-500 dark:text-gray-600 text-sm">
+        <p data-i18n="footer">© 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // 1. Dark Mode Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check Saved Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 2. Language Logic (Mock Translation)
+        const translations = {
+            ar: {
+                login: "دخول",
+                register: "حساب جديد",
+                hero_badge: "النظام المالي الآمن v2.0",
+                hero_title: "الجيل القادم من <br> خدمات الاستيراد",
+                hero_desc: "نظام رقمي متكامل يربط تجارتك بالصين عبر محفظة افتراضية موثقة بسجلات رسمية. تحكم، تتبع، واستلم بضائعك في ليبيا بأمان تام.",
+                card1_title: "ربط لوجستي مباشر",
+                card1_desc: "من مستودعات الصين إلى مدن ليبيا (طرابلس، بنغازي، مصراتة) عبر خطوط شحن جوي وبحري منتظمة.",
+                card2_title: "محفظة موثقة",
+                card2_desc: "رصيدك الافتراضي يطابق تماماً <br> سجلاتنا المالية المعتمدة.",
+                card3_title: "تتبع حي",
+                card3_desc: "راقب طلباتك في كل خطوة.",
+                card4_title: "دعم فوري",
+                card4_desc: "فريقنا معك في المكاتب وعبر الموقع.",
+                cta_title: "ابدأ رحلة الاستيراد الآن",
+                cta_desc: "سجل حسابك مجاناً واحصل على عنوانك الصيني.",
+                footer: "© 2024 Baridex. جميع الحقوق محفوظة."
+            },
+            en: {
+                login: "Login",
+                register: "Get Started",
+                hero_badge: "Secure Financial System v2.0",
+                hero_title: "The Next Gen of <br> Import Services",
+                hero_desc: "An integrated digital system connecting your business to China via a verified virtual wallet. Control, track, and receive your goods in Libya securely.",
+                card1_title: "Direct Logistics",
+                card1_desc: "From Chinese warehouses to Libyan cities (Tripoli, Benghazi, Misrata) via regular air and sea freight lines.",
+                card2_title: "Verified Wallet",
+                card2_desc: "Your virtual balance perfectly matches <br> our certified financial records.",
+                card3_title: "Live Tracking",
+                card3_desc: "Monitor your orders at every step.",
+                card4_title: "Instant Support",
+                card4_desc: "Our team is with you online and offline.",
+                cta_title: "Start Importing Now",
+                cta_desc: "Register for free and get your Chinese address.",
+                footer: "© 2024 Baridex. All rights reserved."
+            }
+        };
+
+        let currentLang = 'ar';
+
+        function toggleLang() {
+            const html = document.documentElement;
+            const btnText = document.getElementById('lang-text');
+            
+            if (currentLang === 'ar') {
+                // Switch to English
+                currentLang = 'en';
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+                btnText.textContent = 'AR';
+            } else {
+                // Switch to Arabic
+                currentLang = 'ar';
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+                btnText.textContent = 'EN';
+            }
+
+            // Apply translations
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+        }
+    </script>
+</body>
+</html>

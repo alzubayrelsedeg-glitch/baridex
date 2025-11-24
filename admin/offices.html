@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المكاتب - Admin - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Transition */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal.show { opacity: 1; visibility: visible; }
+        .modal-content-anim { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.show .modal-content-anim { transform: scale(1); }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Admin Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold tracking-wider text-gray-900 dark:text-white leading-none">Baridex</span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التسعير</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الطلبات</a>
+                    <a href="customers.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">العملاء</a>
+                    <a href="offices.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">المكاتب</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التذاكر</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="hidden md:block px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6 flex-grow">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📍</span> إدارة المكاتب
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">إضافة وتعديل بيانات مكاتب الاستلام.</p>
+                </div>
+                <button onclick="addOffice()" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center gap-2 transform hover:scale-[1.02]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    إضافة مكتب جديد
+                </button>
+            </div>
+
+            <!-- Offices Grid -->
+            <div id="officesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Add/Edit Office -->
+    <div id="officeModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white" id="modalTitle">إضافة مكتب</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="officeForm" class="p-6">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="messageToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all duration-300">
+        <div class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm flex items-center gap-2">
+            <span id="messageIcon">✅</span>
+            <span id="messageText">تمت العملية بنجاح</span>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- Toast UI ---
+        window.showMessage = function(msg, type = 'success') {
+            const toast = document.getElementById('messageToast');
+            const text = document.getElementById('messageText');
+            const icon = document.getElementById('messageIcon');
+            
+            text.textContent = msg;
+            icon.textContent = type === 'error' ? '❌' : '✅';
+            
+            toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        };
+
+        // --- App Logic ---
+        if (typeof Auth !== 'undefined') {
+            Auth.requireAdmin();
+
+            function loadOffices() {
+                const officesList = document.getElementById('officesList');
+                const offices = db.getAll('offices');
+
+                if (offices.length === 0) {
+                    officesList.innerHTML = `
+                        <div class="col-span-full text-center py-16 text-gray-400">
+                            <div class="text-4xl mb-2">📭</div>
+                            <p>لا توجد مكاتب مسجلة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                offices.forEach(office => {
+                    const customersCount = db.getMany('users', u => u.officeId === office.id && !u.isAdmin).length;
+                    
+                    html += `
+                        <div class="bg-white dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl p-6 hover:border-brand-500/50 transition group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-brand-500/10 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+                            
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl font-bold shadow-sm">
+                                    ${office.id}
+                                </div>
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${office.active ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'}">
+                                    ${office.active ? 'نشط' : 'معطل'}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">${office.name}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${office.city}</p>
+                            
+                            <div class="space-y-2 text-sm border-t border-gray-100 dark:border-white/5 pt-4 mb-4">
+                                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                    <span class="opacity-50">📍</span> ${office.address}
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                    <span class="opacity-50">📞</span> <span class="dir-ltr">${office.phone}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                    <span class="opacity-50">👥</span> ${customersCount} عميل
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="editOffice(${office.id})" class="flex-1 py-2 rounded-lg bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition text-sm font-bold">
+                                    تعديل
+                                </button>
+                                <button onclick="toggleOffice(${office.id})" class="flex-1 py-2 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition text-sm text-gray-500 dark:text-gray-400">
+                                    ${office.active ? 'تعطيل' : 'تفعيل'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                officesList.innerHTML = html;
+            }
+
+            // Expose functions to window
+            window.addOffice = function() {
+                document.getElementById('modalTitle').textContent = 'إضافة مكتب جديد';
+                document.getElementById('officeForm').innerHTML = getOfficeFormHtml();
+                document.getElementById('officeModal').classList.add('show');
+                document.getElementById('officeFormElement').addEventListener('submit', saveOffice);
+            };
+
+            window.editOffice = function(id) {
+                const office = db.getOne('offices', o => o.id === id);
+                if (!office) return;
+
+                document.getElementById('modalTitle').textContent = 'تعديل المكتب';
+                document.getElementById('officeForm').innerHTML = getOfficeFormHtml(office);
+                document.getElementById('officeModal').classList.add('show');
+                document.getElementById('officeFormElement').addEventListener('submit', saveOffice);
+            };
+
+            function getOfficeFormHtml(office = null) {
+                const id = office ? office.id : '';
+                const name = office ? office.name : '';
+                const city = office ? office.city : '';
+                const address = office ? office.address : '';
+                const phone = office ? office.phone : '';
+                const active = office ? office.active : true;
+
+                return `
+                    <form id="officeFormElement" class="space-y-4">
+                        <input type="hidden" id="officeId" value="${id}">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اسم المكتب <span class="text-red-500">*</span></label>
+                            <input type="text" id="officeName" required value="${name}" placeholder="مثال: مكتب طرابلس الرئيسي" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المدينة <span class="text-red-500">*</span></label>
+                            <input type="text" id="officeCity" required value="${city}" placeholder="مثال: طرابلس" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">العنوان <span class="text-red-500">*</span></label>
+                            <input type="text" id="officeAddress" required value="${address}" placeholder="مثال: شارع الجمهورية" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
+                            <input type="tel" id="officePhone" required value="${phone}" placeholder="09xxxxxxxx" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-left dir-ltr">
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2">
+                            <input type="checkbox" id="officeActive" ${active ? 'checked' : ''} class="w-5 h-5 text-brand-600 rounded border-gray-300 dark:border-white/10 focus:ring-brand-500">
+                            <label for="officeActive" class="text-sm font-medium text-gray-700 dark:text-gray-300">المكتب نشط ومتاح للعملاء</label>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition shadow-lg shadow-brand-500/20 mt-4">
+                            ${office ? 'حفظ التعديلات' : 'إضافة المكتب'}
+                        </button>
+                    </form>
+                `;
+            }
+
+            function saveOffice(e) {
+                e.preventDefault();
+
+                const id = document.getElementById('officeId').value;
+                const name = document.getElementById('officeName').value.trim();
+                const city = document.getElementById('officeCity').value.trim();
+                const address = document.getElementById('officeAddress').value.trim();
+                const phone = document.getElementById('officePhone').value.trim();
+                const active = document.getElementById('officeActive').checked;
+
+                if (!name || !city || !address || !phone) {
+                    showMessage('الرجاء ملء جميع الحقول', 'error');
+                    return;
+                }
+
+                if (id) {
+                    db.update('offices', o => o.id === parseInt(id), { name, city, address, phone, active });
+                    showMessage('تم تحديث المكتب بنجاح');
+                } else {
+                    const offices = db.getAll('offices');
+                    const newId = offices.length > 0 ? Math.max(...offices.map(o => o.id)) + 1 : 1;
+                    db.insert('offices', { id: newId, name, city, address, phone, active });
+                    showMessage('تم إضافة المكتب بنجاح');
+                }
+
+                closeModal();
+                loadOffices();
+            }
+
+            window.toggleOffice = function(id) {
+                const office = db.getOne('offices', o => o.id === id);
+                const action = office.active ? 'تعطيل' : 'تفعيل';
+                
+                if (!confirm(`هل أنت متأكد من ${action} هذا المكتب؟`)) return;
+
+                db.update('offices', o => o.id === id, { active: !office.active });
+                showMessage(`تم ${action} المكتب`);
+                loadOffices();
+            };
+
+            window.closeModal = function() {
+                document.getElementById('officeModal').classList.remove('show');
+            }
+            
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('officeModal')) closeModal();
+            }
+
+            loadOffices();
+        }
+    </script>
+</body>
+</html>

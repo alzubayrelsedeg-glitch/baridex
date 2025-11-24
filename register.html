@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب جديد - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Form Elements Customization */
+        input, select {
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Navbar (Simplified for Auth Pages) -->
+    <nav class="absolute w-full z-50 top-0 left-0 p-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <span class="text-xl font-bold tracking-wider text-gray-900 dark:text-white">Baridex</span>
+            </a>
+            
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur hover:bg-white dark:hover:bg-white/10 transition">
+                <svg class="w-5 h-5 hidden dark:block text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg class="w-5 h-5 block dark:hidden text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 flex-grow flex items-center justify-center py-24 px-4 sm:px-6">
+        <div class="w-full max-w-md">
+            
+            <!-- Auth Card -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-2xl shadow-gray-200/50 dark:shadow-black/50">
+                
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-2">إنشاء حساب جديد</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">ابدأ رحلة الاستيراد الآمنة مع Baridex</p>
+                </div>
+
+                <!-- Alert Messages Container -->
+                <div id="message" class="mb-6 hidden rounded-xl p-4 text-sm font-medium"></div>
+
+                <form id="registerForm" class="space-y-5">
+                    
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">الاسم الكامل <span class="text-red-500">*</span></label>
+                        <input type="text" id="fullName" required placeholder="مثال: محمد أحمد" 
+                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">البريد الإلكتروني <span class="text-red-500">*</span></label>
+                        <input type="email" id="email" required placeholder="example@email.com" 
+                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">رقم الواتساب <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="tel" id="phone" required placeholder="09xxxxxxxx" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-left" dir="ltr">
+                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                                <span class="text-gray-400 text-xs">LY</span>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">يجب أن يبدأ بـ 091, 092, 093, 094, أو 095</p>
+                    </div>
+
+                    <!-- Office Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">مكتب الاستلام المفضّل <span class="text-red-500">*</span></label>
+                        <select id="officeId" required 
+                                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none appearance-none">
+                            <option value="" class="dark:bg-dark-900">اختر المكتب</option>
+                            <!-- سيتم ملؤها بواسطة JS -->
+                        </select>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">كلمة المرور <span class="text-red-500">*</span></label>
+                            <input type="password" id="password" required placeholder="••••••" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">تأكيدها <span class="text-red-500">*</span></label>
+                            <input type="password" id="confirmPassword" required placeholder="••••••" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition transform hover:-translate-y-0.5">
+                        إنشاء الحساب
+                    </button>
+                </form>
+
+                <!-- Footer Links -->
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-white/10 text-center space-y-2">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        لديك حساب بالفعل؟ 
+                        <a href="login.html" class="font-semibold text-brand-600 dark:text-brand-400 hover:underline">تسجيل الدخول</a>
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        <a href="index.html" class="hover:text-gray-900 dark:hover:text-white transition">العودة للصفحة الرئيسية</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Original Scripts Logic -->
+    <!-- تأكد من وجود هذه الملفات في المجلد الصحيح -->
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        // --- Theme Logic (From Master) ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- UI Helper for Messages ---
+        // استبدال دالة showMessage الافتراضية لتناسب تصميم Tailwind
+        const originalShowMessage = window.showMessage || function(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = msg;
+            msgDiv.className = 'mb-6 rounded-xl p-4 text-sm font-medium block ';
+            
+            if (type === 'error') {
+                msgDiv.className += 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 border border-red-200 dark:border-red-500/20';
+            } else {
+                msgDiv.className += 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400 border border-green-200 dark:border-green-500/20';
+            }
+            msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        // إعادة تعريف الدالة عالمياً لاستخدامها في الكود بالأسفل
+        window.showMessage = originalShowMessage;
+
+
+        // --- Registration Logic (Your Original Code) ---
+        window.addEventListener('DOMContentLoaded', function() {
+            const officeSelect = document.getElementById('officeId');
+            
+            // محاكاة البيانات في حال عدم وجود ملف db.js للعرض فقط
+            let offices = [];
+            if (typeof db !== 'undefined' && db.getAll) {
+                offices = db.getAll('offices').filter(o => o.active);
+            } else {
+                // Fallback for design preview
+                console.warn('db.js not found, using mock data');
+                offices = [
+                    { id: 1, name: 'مكتب طرابلس الرئيسي', city: 'طرابلس' },
+                    { id: 2, name: 'فرع بنغازي', city: 'بنغازي' },
+                    { id: 3, name: 'فرع مصراتة', city: 'مصراتة' }
+                ];
+            }
+
+            offices.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.id;
+                option.textContent = `${office.name} - ${office.city}`;
+                option.className = "dark:bg-dark-900"; // Fix dropdown bg in dark mode
+                officeSelect.appendChild(option);
+            });
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const officeId = document.getElementById('officeId').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Helper Validation Functions (if not in external files)
+            const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            const isValidLibyanPhone = (phone) => /^(091|092|093|094|095)\d{7}$/.test(phone);
+
+            // التحقق من المدخلات
+            if (!fullName || fullName.length < 3) {
+                showMessage('الرجاء إدخال اسم صحيح (3 أحرف على الأقل)', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showMessage('الرجاء إدخال بريد إلكتروني صحيح', 'error');
+                return;
+            }
+
+            if (!isValidLibyanPhone(phone)) {
+                showMessage('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 091/092/093/094/095', 'error');
+                return;
+            }
+
+            if (!officeId) {
+                showMessage('الرجاء اختيار مكتب الاستلام', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('كلمة المرور غير متطابقة', 'error');
+                return;
+            }
+
+            // محاولة التسجيل
+            if (typeof Auth !== 'undefined') {
+                const result = Auth.register({
+                    fullName,
+                    email,
+                    phone,
+                    officeId,
+                    password
+                });
+
+                if (result.success) {
+                    showMessage('تم إنشاء الحساب بنجاح! جاري تحويلك...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } else {
+                // Mock success for UI testing
+                showMessage('تم التحقق من الواجهة بنجاح (وضع التصميم)', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

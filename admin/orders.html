@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات - Admin - Baridex</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Transition */
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal.show { opacity: 1; visibility: visible; }
+        .modal-content-anim { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.show .modal-content-anim { transform: scale(1); }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Admin Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold tracking-wider text-gray-900 dark:text-white leading-none">Baridex</span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التسعير</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">الطلبات</a>
+                    <a href="customers.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">العملاء</a>
+                    <a href="offices.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">المكاتب</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التذاكر</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="hidden md:block px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6 flex-grow">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📦</span> إدارة الطلبات
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">متابعة وتحديث حالات جميع الطلبات في النظام.</p>
+                </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl p-4 mb-6 shadow-sm flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">تصفية حسب الحالة</label>
+                    <div class="relative">
+                        <select id="filterStatus" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none appearance-none">
+                            <option value="all" class="dark:bg-dark-900">الكل</option>
+                            <option value="pending_purchase" class="dark:bg-dark-900">بانتظار الشراء</option>
+                            <option value="purchased" class="dark:bg-dark-900">تم الشراء</option>
+                            <option value="arrived_china" class="dark:bg-dark-900">وصل الصين</option>
+                            <option value="consolidated" class="dark:bg-dark-900">تم التجميع</option>
+                            <option value="shipped" class="dark:bg-dark-900">تم الشحن</option>
+                            <option value="arrived_libya" class="dark:bg-dark-900">وصل ليبيا</option>
+                            <option value="ready_pickup" class="dark:bg-dark-900">جاهز للاستلام</option>
+                            <option value="completed" class="dark:bg-dark-900">مكتمل</option>
+                            <option value="cancelled" class="dark:bg-dark-900">ملغي</option>
+                        </select>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">بحث</label>
+                    <div class="relative">
+                        <input type="text" id="searchOrder" placeholder="رقم الطلب، اسم العميل، أو الهاتف" 
+                               class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none pl-10">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-xl overflow-hidden">
+                <div id="ordersList" class="custom-scrollbar overflow-x-auto">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Order Details / Update Status -->
+    <div id="orderModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white" id="modalTitle">تفاصيل الطلب</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="modalContent" class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="messageToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] hidden transition-all duration-300">
+        <div class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm flex items-center gap-2">
+            <span id="messageIcon">✅</span>
+            <span id="messageText">تمت العملية بنجاح</span>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- Toast UI ---
+        window.showMessage = function(msg, type = 'success') {
+            const toast = document.getElementById('messageToast');
+            const text = document.getElementById('messageText');
+            const icon = document.getElementById('messageIcon');
+            
+            text.textContent = msg;
+            icon.textContent = type === 'error' ? '❌' : '✅';
+            
+            toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        };
+
+        // --- App Logic ---
+        if (typeof Auth !== 'undefined') {
+            Auth.requireAdmin();
+
+            // Event Listeners
+            document.getElementById('filterStatus').addEventListener('change', loadOrders);
+            document.getElementById('searchOrder').addEventListener('input', loadOrders);
+
+            function loadOrders() {
+                const filter = document.getElementById('filterStatus').value;
+                const search = document.getElementById('searchOrder').value.toLowerCase();
+                const ordersList = document.getElementById('ordersList');
+                
+                let orders = db.getAll('orders');
+                
+                if (filter !== 'all') {
+                    orders = orders.filter(o => o.status === filter);
+                }
+
+                if (search) {
+                    orders = orders.filter(o => {
+                        const customer = db.getOne('users', u => u.id === o.userId);
+                        return o.id.toString().includes(search) || 
+                               customer.fullName.toLowerCase().includes(search) ||
+                               customer.phone.includes(search);
+                    });
+                }
+
+                orders = orders.reverse();
+
+                if (orders.length === 0) {
+                    ordersList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 text-4xl">📦</div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">لا توجد طلبات</h3>
+                            <p class="text-gray-500 dark:text-gray-400 max-w-sm">لا توجد نتائج تطابق بحثك الحالي.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                <table class="w-full text-right whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 rounded-tr-2xl">رقم الطلب</th>
+                            <th class="px-6 py-4">العميل</th>
+                            <th class="px-6 py-4">المبلغ</th>
+                            <th class="px-6 py-4">الحالة</th>
+                            <th class="px-6 py-4">التاريخ</th>
+                            <th class="px-6 py-4 rounded-tl-2xl">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">`;
+                
+                orders.forEach(order => {
+                    const customer = db.getOne('users', u => u.id === order.userId);
+                    const statusColor = getOrderStatusColor(order.status); // Hex
+                    const statusName = getOrderStatusName(order.status);
+                    
+                    html += `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition group">
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">#${order.id}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xs font-bold">
+                                        ${customer.fullName.charAt(0)}
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white">${customer.fullName}</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 dir-ltr text-right">${customer.phone}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-bold text-green-600 dark:text-green-400 dir-ltr">${formatMoney(order.totalAmount)}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold text-white shadow-sm" style="background-color: ${statusColor};">
+                                    ${statusName}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">${formatDate(order.createdAt)}</td>
+                            <td class="px-6 py-4 flex gap-2">
+                                <button onclick="viewOrder(${order.id})" class="p-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition" title="عرض التفاصيل">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                                ${order.status !== 'completed' && order.status !== 'cancelled' ? 
+                                    `<button onclick="openUpdateModal(${order.id})" class="p-2 rounded-lg text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition" title="تحديث الحالة">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    </button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                ordersList.innerHTML = html;
+            }
+
+            // View Order Modal
+            window.viewOrder = function(id) {
+                const order = db.getOne('orders', o => o.id === id);
+                const customer = db.getOne('users', u => u.id === order.userId);
+                const quote = db.getOne('quotes', q => q.id === order.quoteId);
+                const request = db.getOne('priceRequests', r => r.id === order.requestId);
+                const office = db.getOne('offices', of => of.id === customer.officeId);
+
+                document.getElementById('modalTitle').textContent = `تفاصيل الطلب #${order.id}`;
+                
+                // Generate Timeline HTML
+                const statuses = order.statusHistory || [];
+                let timelineHtml = '';
+                statuses.forEach((statusItem, index) => {
+                    const isLast = index === statuses.length - 1;
+                    const itemColor = getOrderStatusColor(statusItem.status);
+                    
+                    timelineHtml += `
+                        <div class="relative flex gap-4 ${isLast ? '' : 'pb-8'}">
+                            ${!isLast ? `<div class="absolute top-8 right-[0.9rem] w-0.5 h-[calc(100%-2rem)] bg-gray-200 dark:bg-gray-700"></div>` : ''}
+                            <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm" style="background-color: ${itemColor};">
+                                ${index + 1}
+                            </div>
+                            <div class="pt-0.5">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">${getOrderStatusName(statusItem.status)}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right">${formatDateTime(statusItem.timestamp)}</p>
+                                ${statusItem.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 mt-2 bg-gray-50 dark:bg-white/5 p-2 rounded border border-gray-100 dark:border-white/5">📝 ${statusItem.note}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const html = `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Customer Info -->
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/10">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2">👤 العميل</h4>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">${customer.fullName}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 dir-ltr text-right mt-1">${customer.phone}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${customer.email}</p>
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2">🛒 المنتج</h4>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">المنصة: ${getPlatformName(request.platform)}</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">الكمية: ${quote.quantity}</p>
+                                <a href="${request.productUrl}" target="_blank" class="text-xs text-brand-600 hover:underline block mt-2">🔗 رابط المنتج</a>
+                            </div>
+                        </div>
+
+                        <!-- Office Info -->
+                        <div class="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-500/10">
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2">📍 مكتب الاستلام</h4>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">${office.name} - ${office.city}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">📞 ${office.phone}</p>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-6">🚚 تتبع الحالة</h4>
+                            <div class="pr-2">
+                                ${timelineHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('modalContent').innerHTML = html;
+                document.getElementById('orderModal').classList.add('show');
+            };
+
+            // Update Status Modal
+            window.openUpdateModal = function(orderId) {
+                const order = db.getOne('orders', o => o.id === orderId);
+                const customer = db.getOne('users', u => u.id === order.userId);
+
+                document.getElementById('modalTitle').textContent = 'تحديث حالة الطلب';
+
+                const html = `
+                    <div class="bg-brand-50 dark:bg-brand-900/10 p-4 rounded-xl border border-brand-100 dark:border-brand-500/10 mb-6">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">رقم الطلب</span>
+                            <span class="text-sm font-bold text-brand-600">#${order.id}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">العميل</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">${customer.fullName}</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-brand-100 dark:border-brand-500/10 flex justify-between items-center">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">الحالة الحالية</span>
+                            <span class="px-2 py-0.5 rounded text-xs font-bold text-white" style="background-color: ${getOrderStatusColor(order.status)};">
+                                ${getOrderStatusName(order.status)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <form id="updateStatusForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">الحالة الجديدة <span class="text-red-500">*</span></label>
+                            <select id="newStatus" required class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none">
+                                <option value="" class="dark:bg-dark-900">اختر الحالة</option>
+                                <option value="pending_purchase" class="dark:bg-dark-900">بانتظار الشراء</option>
+                                <option value="purchased" class="dark:bg-dark-900">تم الشراء من المورد</option>
+                                <option value="arrived_china" class="dark:bg-dark-900">وصل الصين</option>
+                                <option value="consolidated" class="dark:bg-dark-900">تم التجميع</option>
+                                <option value="shipped" class="dark:bg-dark-900">تم الشحن</option>
+                                <option value="arrived_libya" class="dark:bg-dark-900">وصل ليبيا</option>
+                                <option value="ready_pickup" class="dark:bg-dark-900">جاهز للاستلام</option>
+                                <option value="completed" class="dark:bg-dark-900">مكتمل</option>
+                                <option value="cancelled" class="dark:bg-dark-900">ملغي</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">ملاحظة</label>
+                            <textarea id="statusNote" rows="3" placeholder="سبب التحديث أو ملاحظات إضافية للعميل..." 
+                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-500 outline-none resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-lg shadow-green-500/20">
+                            حفظ التحديث
+                        </button>
+                    </form>
+                `;
+
+                document.getElementById('modalContent').innerHTML = html;
+                document.getElementById('orderModal').classList.add('show');
+
+                document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const newStatus = document.getElementById('newStatus').value;
+                    const note = document.getElementById('statusNote').value.trim();
+
+                    if (!newStatus) {
+                        showMessage('الرجاء اختيار الحالة', 'error');
+                        return;
+                    }
+
+                    const statusHistory = order.statusHistory || [];
+                    statusHistory.push({
+                        status: newStatus,
+                        timestamp: new Date().toISOString(),
+                        note: note || ''
+                    });
+
+                    db.update('orders', o => o.id === orderId, {
+                        status: newStatus,
+                        statusHistory: statusHistory,
+                        updatedAt: new Date().toISOString()
+                    });
+
+                    showMessage('تم تحديث الحالة بنجاح');
+                    closeModal();
+                    loadOrders();
+                });
+            };
+
+            window.closeModal = function() {
+                document.getElementById('orderModal').classList.remove('show');
+            }
+            
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('orderModal')) closeModal();
+            }
+
+            loadOrders();
+        }
+    </script>
+</body>
+</html>

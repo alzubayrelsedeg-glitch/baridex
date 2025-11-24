@@ -1,0 +1,236 @@
+/* ====================================
+   Baridex Design System v2.0
+   (Tailwind CSS Companion)
+   ==================================== */
+
+/* 1. استيراد الخطوط */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap');
+
+/* 2. متغيرات النظام (تتوافق مع Tailwind Config) */
+:root {
+    --color-brand: #3B82F6;
+    --color-brand-dark: #2563EB;
+    --color-bg-light: #f9fafb;
+    --color-bg-dark: #030712; /* gray-950 */
+    
+    /* ألوان الشبكة الخلفية */
+    --grid-color-light: rgba(0, 0, 0, 0.03);
+    --grid-color-dark: rgba(255, 255, 255, 0.03);
+}
+
+/* 3. إعدادات أساسية */
+body {
+    font-family: 'Cairo', sans-serif; /* العربية افتراضياً */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+}
+
+/* في حال وجود نصوص إنجليزية */
+[dir="ltr"], .font-sans {
+    font-family: 'Inter', sans-serif;
+}
+
+/* 4. خلفية الشبكة (Grid Background) */
+.grid-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: 
+        linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    pointer-events: none;
+}
+
+/* دعم الوضع الليلي للشبكة */
+html:not(.dark) { --grid-color: var(--grid-color-light); }
+html.dark { --grid-color: var(--grid-color-dark); }
+
+/* 5. شريط التمرير المخصص (Scrollbar) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(59, 130, 246, 0.8);
+}
+
+/* 6. أنيميشن النوافذ المنبثقة (Modals) */
+.modal {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 9999; /* للتأكد من ظهورها فوق كل شيء */
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content-anim {
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.show .modal-content-anim {
+    transform: scale(1) translateY(0);
+}
+
+/* ====================================
+   7. توافقية العناصر القديمة (Legacy Support)
+   لضمان أن العناصر المولدة بواسطة JS (مثل الجداول والتنبيهات)
+   تظهر بالتصميم الجديد تلقائياً.
+   ==================================== */
+
+/* الجداول (Tables) */
+.table-container table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+}
+
+.table-container th {
+    text-align: right;
+    padding: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280; /* gray-500 */
+    border-bottom: 1px solid #e5e7eb;
+}
+
+html.dark .table-container th {
+    color: #9ca3af; /* gray-400 */
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.table-container td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #1f2937;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+}
+
+html.dark .table-container td {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+}
+
+.table-container tr:hover td {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+html.dark .table-container tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* الشارات (Badges) داخل الجداول */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.badge-success, [style*="background: #10b981"] {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+html.dark .badge-success, html.dark [style*="background: #10b981"] {
+    color: #34d399 !important;
+}
+
+.badge-warning, [style*="background: #f59e0b"] {
+    background-color: rgba(245, 158, 11, 0.1) !important;
+    color: #d97706 !important;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+html.dark .badge-warning, html.dark [style*="background: #f59e0b"] {
+    color: #fbbf24 !important;
+}
+
+.badge-danger, [style*="background: #ef4444"] {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    color: #dc2626 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+html.dark .badge-danger, html.dark [style*="background: #ef4444"] {
+    color: #f87171 !important;
+}
+
+/* الأزرار القديمة (للتوافق مع JS) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, var(--color-brand-dark), var(--color-brand));
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3); }
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+/* التنبيهات (Alerts/Toasts) */
+#messageToast {
+    z-index: 9999;
+}
+
+/* حالة فارغة (Empty State) */
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+}
+.empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+html.dark .empty-state { color: #9ca3af; }
+
+/* 8. تحسينات إضافية للنماذج */
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: var(--color-brand);
+}
+
+/* إصلاح اتجاه النصوص */
+.dir-ltr { direction: ltr; text-align: left; }
+.dir-rtl { direction: rtl; text-align: right; }

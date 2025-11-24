@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة العملاء - Baridex Admin</title>
+    
+    <!-- Tailwind & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        dark: { 950: '#030712', 900: '#0B0F19', 800: '#151b2b' },
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        accent: { 400: '#A78BFA', 500: '#8B5CF6' }
+                    },
+                    animation: { 'blob': 'blob 7s infinite' },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; font-family: 'Cairo', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+        html.dark { --grid-color: rgba(255,255,255,0.03); }
+        html:not(.dark) { --grid-color: rgba(0,0,0,0.03); }
+
+        /* Modal Transition */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content-anim {
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal.show .modal-content-anim {
+            transform: scale(1);
+        }
+
+        /* Custom Scrollbar for Tables */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-600/30 dark:bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob opacity-50 dark:opacity-20"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-accent-500/30 dark:bg-accent-500 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600/30 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000 opacity-50 dark:opacity-20"></div>
+        <div class="absolute inset-0 grid-bg z-0"></div>
+    </div>
+
+    <!-- Admin Navbar -->
+    <nav class="fixed w-full z-50 top-0 left-0 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-dark-950/80 backdrop-blur-xl transition-colors">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <span class="font-bold text-white text-lg">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold tracking-wider text-gray-900 dark:text-white leading-none">Baridex</span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Navigation Links (Hidden on mobile for simplicity in this demo) -->
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الرئيسية</a>
+                    <a href="price-requests.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التسعير</a>
+                    <a href="orders.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">الطلبات</a>
+                    <a href="customers.html" class="px-3 py-2 text-sm font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition">العملاء</a>
+                    <a href="offices.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">المكاتب</a>
+                    <a href="tickets.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition">التذاكر</a>
+                </div>
+
+                <div class="h-6 w-[1px] bg-gray-300 dark:bg-white/10 hidden md:block"></div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <button onclick="Auth.logout()" class="px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-lg shadow-red-500/20 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-32 pb-12 px-4 sm:px-6">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header & Search -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white">👥 إدارة العملاء</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">عرض ومراقبة بيانات المستخدمين وأرصدتهم.</p>
+                </div>
+                
+                <div class="relative w-full md:w-96 group">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-brand-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" id="searchCustomer" placeholder="ابحث بالاسم، الهاتف أو البريد..." 
+                           class="w-full pr-10 pl-4 py-3 rounded-xl bg-white/80 dark:bg-dark-900/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none shadow-sm transition">
+                </div>
+            </div>
+
+            <!-- Customers Card -->
+            <div class="bg-white/70 dark:bg-dark-900/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-xl overflow-hidden">
+                <div id="customersList" class="custom-scrollbar overflow-x-auto">
+                    <!-- Table will be injected here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Customer Details -->
+    <div id="customerModal" class="modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-4xl rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
+                    ملف العميل
+                </h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition bg-gray-100 dark:bg-white/5 p-2 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="customerDetails" class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Details injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Wallet Top-up -->
+    <div id="walletModal" class="modal fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="modal-content-anim bg-white dark:bg-dark-900 w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10">
+            
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/5">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-green-500">💰</span> شحن المحفظة
+                </h2>
+                <button onclick="closeWalletModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="walletForm" class="p-6">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-gray-500 dark:text-gray-600 text-sm relative z-10">
+        <p>&copy; 2024 Baridex. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+    
+    <script>
+        // --- Logic to maintain Theme ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // --- App Logic ---
+        // Note: Check if Auth exists to prevent errors during preview if files missing
+        if (typeof Auth !== 'undefined') {
+            Auth.requireAdmin();
+        }
+
+        document.getElementById('searchCustomer').addEventListener('input', loadCustomers);
+
+        function loadCustomers() {
+            const search = document.getElementById('searchCustomer').value.toLowerCase();
+            const customersList = document.getElementById('customersList');
+            
+            // Mock Data Fallback if db not present (For Design Preview)
+            let customers = [];
+            if (typeof db !== 'undefined' && db.getMany) {
+                customers = db.getMany('users', u => !u.isAdmin);
+            }
+
+            if (search) {
+                customers = customers.filter(c => 
+                    c.fullName.toLowerCase().includes(search) ||
+                    c.phone.includes(search) ||
+                    c.email.toLowerCase().includes(search)
+                );
+            }
+
+            customers = customers.reverse();
+
+            if (customers.length === 0) {
+                customersList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">لا توجد نتائج</h3>
+                        <p class="text-sm">حاول البحث بكلمات مختلفة</p>
+                    </div>`;
+                return;
+            }
+
+            // Tailwind Styled Table Generation
+            let html = `
+            <table class="w-full text-right whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-4 rounded-tr-2xl">الرقم</th>
+                        <th class="px-6 py-4">الاسم</th>
+                        <th class="px-6 py-4">الهاتف</th>
+                        <th class="px-6 py-4">الرصيد</th>
+                        <th class="px-6 py-4">المكتب</th>
+                        <th class="px-6 py-4 rounded-tl-2xl text-center">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-white/5">`;
+            
+            customers.forEach(customer => {
+                const office = db.getOne('offices', o => o.id === customer.officeId);
+                
+                html += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">#${customer.id}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs">
+                                    ${customer.fullName.charAt(0)}
+                                </div>
+                                ${customer.fullName}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300" dir="ltr">${customer.phone}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2.5 py-1 rounded-md bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 font-bold border border-green-200 dark:border-green-500/20">
+                                ${formatMoney(customer.walletBalance)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${office ? office.name : '-'}</td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="viewCustomer(${customer.id})" class="p-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition" title="عرض التفاصيل">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                                <button onclick="addWalletBalance(${customer.id})" class="p-2 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 transition" title="شحن المحفظة">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            customersList.innerHTML = html;
+        }
+
+        function viewCustomer(id) {
+            const customer = db.getOne('users', u => u.id === id);
+            const office = db.getOne('offices', o => o.id === customer.officeId);
+            const orders = db.getMany('orders', o => o.userId === id);
+            const priceRequests = db.getMany('priceRequests', r => r.userId === id);
+            const walletTransactions = db.getMany('walletTransactions', t => t.userId === id);
+
+            // Utility for status badge color
+            const getStatusClass = (status) => {
+                // Simplified logic for design
+                return "bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300";
+            };
+
+            let html = `
+                <div class="space-y-6">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex flex-col items-center text-center">
+                            <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-2 text-lg">💰</div>
+                            <div class="text-xl font-bold text-gray-900 dark:text-white">${formatMoney(customer.walletBalance)}</div>
+                            <div class="text-xs text-gray-500">الرصيد الحالي</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex flex-col items-center text-center">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 text-lg">📦</div>
+                            <div class="text-xl font-bold text-gray-900 dark:text-white">${orders.length}</div>
+                            <div class="text-xs text-gray-500">إجمالي الطلبات</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex flex-col items-center text-center">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 text-lg">📋</div>
+                            <div class="text-xl font-bold text-gray-900 dark:text-white">${priceRequests.length}</div>
+                            <div class="text-xs text-gray-500">طلبات التسعير</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex flex-col items-center text-center">
+                            <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-2 text-lg">📅</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white pt-2">${formatDate(customer.createdAt)}</div>
+                            <div class="text-xs text-gray-500">تاريخ التسجيل</div>
+                        </div>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div class="p-5 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">المعلومات الشخصية</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                            <div class="flex justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+                                <span class="text-gray-500">الاسم الكامل</span>
+                                <span class="font-medium text-gray-900 dark:text-white">${customer.fullName}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+                                <span class="text-gray-500">رقم الهاتف</span>
+                                <span class="font-medium text-gray-900 dark:text-white" dir="ltr">${customer.phone}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+                                <span class="text-gray-500">البريد الإلكتروني</span>
+                                <span class="font-medium text-gray-900 dark:text-white">${customer.email}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+                                <span class="text-gray-500">المكتب المفضل</span>
+                                <span class="font-medium text-gray-900 dark:text-white">${office ? office.name : '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Last Orders -->
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-white/10">
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <span>🛍️</span> آخر الطلبات
+                            </h3>
+                            ${orders.length === 0 ? '<p class="text-sm text-gray-500 text-center py-4">لا توجد طلبات</p>' : `
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-right">
+                                        <thead><tr class="text-gray-500 text-xs border-b dark:border-white/10"><th class="pb-2">المبلغ</th><th class="pb-2">الحالة</th><th class="pb-2">التاريخ</th></tr></thead>
+                                        <tbody class="divide-y dark:divide-white/5">
+                                            ${orders.slice(-5).reverse().map(order => `
+                                                <tr>
+                                                    <td class="py-2 font-medium">${formatMoney(order.totalAmount)}</td>
+                                                    <td class="py-2"><span class="px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">${getOrderStatusName(order.status)}</span></td>
+                                                    <td class="py-2 text-gray-500 text-xs">${formatDate(order.createdAt)}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- Last Wallet Transactions -->
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-white/10">
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <span>💳</span> سجل المحفظة
+                            </h3>
+                            ${walletTransactions.length === 0 ? '<p class="text-sm text-gray-500 text-center py-4">لا توجد حركات</p>' : `
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-right">
+                                        <thead><tr class="text-gray-500 text-xs border-b dark:border-white/10"><th class="pb-2">المبلغ</th><th class="pb-2">الوصف</th><th class="pb-2">التاريخ</th></tr></thead>
+                                        <tbody class="divide-y dark:divide-white/5">
+                                            ${walletTransactions.slice(-5).reverse().map(trans => `
+                                                <tr>
+                                                    <td class="py-2 font-bold ${trans.type === 'credit' ? 'text-green-600 dark:text-green-400' : 'text-red-500'}" dir="ltr">
+                                                        ${trans.type === 'credit' ? '+' : '-'}${formatMoney(trans.amount)}
+                                                    </td>
+                                                    <td class="py-2 text-gray-600 dark:text-gray-300 text-xs truncate max-w-[100px]">${trans.description}</td>
+                                                    <td class="py-2 text-gray-500 text-xs">${formatDate(trans.createdAt)}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="closeModal(); addWalletBalance(${customer.id})" class="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-500 text-white font-bold shadow-lg shadow-green-500/20 hover:scale-[1.02] transition transform">
+                            شحن المحفظة للعميل
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('customerDetails').innerHTML = html;
+            document.getElementById('customerModal').classList.add('show');
+        }
+
+        function addWalletBalance(customerId) {
+            const customer = db.getOne('users', u => u.id === customerId);
+
+            const html = `
+                <div class="space-y-6">
+                    <div class="p-4 rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-500/20 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-200 dark:bg-brand-500/30 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold text-lg">
+                            ${customer.fullName.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">العميل</p>
+                            <p class="font-bold text-gray-900 dark:text-white">${customer.fullName}</p>
+                        </div>
+                        <div class="mr-auto text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">الرصيد الحالي</p>
+                            <p class="font-bold text-green-600 dark:text-green-400 dir-ltr">${formatMoney(customer.walletBalance)}</p>
+                        </div>
+                    </div>
+
+                    <form id="addBalanceForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">المبلغ (USD) <span class="text-red-500">*</span></label>
+                            <input type="number" id="amount" step="0.01" min="0.01" required placeholder="0.00" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-left" dir="ltr">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">ملاحظة</label>
+                            <textarea id="note" rows="2" placeholder="مثال: إيداع نقدي في فرع طرابلس..." 
+                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition shadow-lg shadow-brand-500/20">
+                            تأكيد العملية
+                        </button>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('walletForm').innerHTML = html;
+            document.getElementById('walletModal').classList.add('show');
+
+            document.getElementById('addBalanceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const amount = parseFloat(document.getElementById('amount').value);
+                const note = document.getElementById('note').value.trim();
+
+                if (!amount || amount <= 0) {
+                    alert('الرجاء إدخال مبلغ صحيح');
+                    return;
+                }
+
+                // Update DB
+                db.update('users', u => u.id === customerId, {
+                    walletBalance: customer.walletBalance + amount
+                });
+
+                // Add Transaction
+                db.insert('walletTransactions', {
+                    id: Date.now(),
+                    userId: customerId,
+                    type: 'credit',
+                    amount: amount,
+                    description: note || 'شحن من قبل الأدمن',
+                    createdAt: new Date().toISOString()
+                });
+
+                alert(`تم شحن ${formatMoney(amount)} لحساب ${customer.fullName}`);
+                closeWalletModal();
+                loadCustomers(); // Refresh table
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('customerModal').classList.remove('show');
+        }
+
+        function closeWalletModal() {
+            document.getElementById('walletModal').classList.remove('show');
+        }
+
+        // Close on click outside
+        window.onclick = function(event) {
+            const cModal = document.getElementById('customerModal');
+            const wModal = document.getElementById('walletModal');
+            if (event.target == cModal) closeModal();
+            if (event.target == wModal) closeWalletModal();
+        }
+
+        // Initial Load
+        loadCustomers();
+    </script>
+</body>
+</html>
